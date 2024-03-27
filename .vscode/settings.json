@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "item.h": "c",
+        "vlc_input_item.h": "c",
+        "vlc_playlist.h": "c",
+        "variant": "c",
+        "array": "c",
+        "chrono": "c",
+        "compare": "c",
+        "functional": "c",
+        "ratio": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c"
+    }
+}
