@@ -328,6 +328,19 @@ vlc_playlist_SetCurrentIndex(vlc_playlist_t *playlist, ssize_t index)
     playlist->has_next = vlc_playlist_ComputeHasNext(playlist);
 
     vlc_playlist_state_NotifyChanges(playlist, &state);
+    printf("Index Selected\n");
+     FILE *file = fopen("playlist.txt", "w");
+    if (file != NULL) {
+        fprintf(file, "Playlist Index: %zu\n", index); 
+
+        // Assuming playlist->items.data[index] is an array of playlist items
+        for (size_t i = 0; i < playlist->items.size; i++) {
+            // Assuming playlist_item_t has a field named 'name'
+            fprintf(file, "Item %zu: %s\n", i, playlist->items.data[i]->media->psz_uri);
+        }
+
+    }
+    fclose(file);
 }
 
 bool

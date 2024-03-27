@@ -226,9 +226,11 @@ vlc_playlist_IndexOfId(vlc_playlist_t *playlist, uint64_t id)
     return -1;
 }
 
+
 void
 vlc_playlist_Clear(vlc_playlist_t *playlist)
 {
+    printf("playlist clear\n");
     vlc_playlist_AssertLocked(playlist);
 
     int ret = vlc_player_SetCurrentMedia(playlist->player, NULL);
@@ -236,6 +238,9 @@ vlc_playlist_Clear(vlc_playlist_t *playlist)
 
     vlc_playlist_ClearItems(playlist);
     vlc_playlist_ItemsReset(playlist);
+    FILE *file = fopen("playlist.txt", "w");
+    fclose(file);
+    
 }
 
 static int
@@ -261,13 +266,16 @@ vlc_playlist_MediaToItems(vlc_playlist_t *playlist, input_item_t *const media[],
     return VLC_SUCCESS;
 }
 
+
+
 int
 vlc_playlist_Insert(vlc_playlist_t *playlist, size_t index,
                     input_item_t *const media[], size_t count)
 {
+    printf("playlist insert\n");
     vlc_playlist_AssertLocked(playlist);
     assert(index <= playlist->items.size);
-
+    
     /* make space in the vector */
     if (!vlc_vector_insert_hole(&playlist->items, index, count))
         return VLC_ENOMEM;
@@ -275,6 +283,12 @@ vlc_playlist_Insert(vlc_playlist_t *playlist, size_t index,
     /* create playlist items in place */
     int ret = vlc_playlist_MediaToItems(playlist, media, count,
                                         &playlist->items.data[index]);
+
+    /*printf("Playlist Information:\n");
+    printf("Playlist Size: %d\n", playlist->items.size);
+    printf("Playlist Index: %d\n", index); 
+    printf("Playlist Count: %d\n", count);*/
+    
     if (ret != VLC_SUCCESS)
     {
         /* we were optimistic, it failed, restore the vector state */
@@ -284,6 +298,18 @@ vlc_playlist_Insert(vlc_playlist_t *playlist, size_t index,
 
     vlc_playlist_ItemsInserted(playlist, index, count);
     vlc_playlist_UpdateNextMedia(playlist);
+    FILE *file = fopen("playlist.txt", "w");
+    if (file != NULL) {
+        fprintf(file, "Playlist Index: %zu\n", index); 
+
+        // Assuming playlist->items.data[index] is an array of playlist items
+        for (size_t i = 0; i < playlist->items.size; i++) {
+            // Assuming playlist_item_t has a field named 'name'
+            fprintf(file, "Item %zu: %s\n", i, playlist->items.data[i]->media->psz_uri);
+        }
+
+    }
+    fclose(file);
 
     return VLC_SUCCESS;
 }
@@ -292,6 +318,7 @@ void
 vlc_playlist_Move(vlc_playlist_t *playlist, size_t index, size_t count,
                   size_t target)
 {
+    printf("playlist move\n");
     vlc_playlist_AssertLocked(playlist);
     assert(index + count <= playlist->items.size);
     assert(target + count <= playlist->items.size);
@@ -300,11 +327,27 @@ vlc_playlist_Move(vlc_playlist_t *playlist, size_t index, size_t count,
 
     vlc_playlist_ItemsMoved(playlist, index, count, target);
     vlc_playlist_UpdateNextMedia(playlist);
+
+    FILE *file = fopen("playlist.txt", "w");
+    if (file != NULL) {
+        fprintf(file, "Playlist Index: %zu\n", index); 
+
+        // Assuming playlist->items.data[index] is an array of playlist items
+        for (size_t i = 0; i < playlist->items.size; i++) {
+            // Assuming playlist_item_t has a field named 'name'
+            fprintf(file, "Item %zu: %s\n", i, playlist->items.data[i]->media->psz_uri);
+        }
+
+    }
+    fclose(file);
+
 }
+
 
 void
 vlc_playlist_Remove(vlc_playlist_t *playlist, size_t index, size_t count)
 {
+    printf("playlist remove\n");
     vlc_playlist_AssertLocked(playlist);
     assert(index < playlist->items.size);
 
@@ -321,6 +364,19 @@ vlc_playlist_Remove(vlc_playlist_t *playlist, size_t index, size_t count)
         vlc_playlist_SetCurrentMedia(playlist, playlist->current);
     else
         vlc_playlist_UpdateNextMedia(playlist);
+
+    FILE *file = fopen("playlist.txt", "w");
+    if (file != NULL) {
+        fprintf(file, "Playlist Index: %zu\n", index); 
+
+        // Assuming playlist->items.data[index] is an array of playlist items
+        for (size_t i = 0; i < playlist->items.size; i++) {
+            // Assuming playlist_item_t has a field named 'name'
+            fprintf(file, "Item %zu: %s\n", i, playlist->items.data[i]->media->psz_uri);
+        }
+
+    }
+    fclose(file);
 }
 
 static int
@@ -349,10 +405,12 @@ vlc_playlist_Replace(vlc_playlist_t *playlist, size_t index,
     return VLC_SUCCESS;
 }
 
+
 int
 vlc_playlist_Expand(vlc_playlist_t *playlist, size_t index,
                     input_item_t *const media[], size_t count)
 {
+    printf("playlist expand\n");
     vlc_playlist_AssertLocked(playlist);
     assert(index < playlist->items.size);
 
@@ -388,5 +446,17 @@ vlc_playlist_Expand(vlc_playlist_t *playlist, size_t index,
             vlc_playlist_UpdateNextMedia(playlist);
     }
 
+    
+    FILE *file = fopen("playlist.txt", "w");
+    if (file != NULL) {
+        fprintf(file, "Playlist Index: %zu\n", index); 
+        // Assuming playlist->items.data[index] is an array of playlist items
+        for (size_t i = 0; i < playlist->items.size; i++) {
+            // Assuming playlist_item_t has a field named 'name'
+            fprintf(file, "Item %zu: %s\n", i, playlist->items.data[i]->media->psz_uri);
+        }
+
+    }
+    fclose(file);
     return VLC_SUCCESS;
 }
